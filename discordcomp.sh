@@ -57,12 +57,13 @@ function thread {
 
 while [[ true ]]
 do
-    pgrep -f "\.exe" -a | gawk 'sub(/\s/,"|")' | gawk -F\| 'function f(file) { n=split(file,a,".exe"); gsub(/.*[\\\/]/,"",a[1]); r=sprintf(a[1] ".exe"); return(r) } IGNORECASE=1 { if ($2!~/(C:\\windows\\)|(Steam.exe)|(steamwebhelper.exe)|(\\Battle.net.exe)|([A-Z]:\\ProgramData\\Battle.net\\Agent\\Agent.[0-9]+\\Agent.exe)/ && $2~/^[A-Z]\:.*\.exe([^\.]+|\s.*)/) { print $1 "|" f($2) } }' >$DB
+    pgrep -f "\.exe" -a | gawk 'sub(/\s/,"|")' | gawk -F\| 'function fn(f) { n=split(f,a,".exe"); gsub(/.*[\\\/]/,"",a[1]); f=sprintf(a[1] ".exe"); return(f) } IGNORECASE=1 { if ($2!~/(C:\\windows\\)|(Steam.exe)|(steamwebhelper.exe)|(\\Battle.net.exe)|([A-Z]:\\ProgramData\\Battle.net\\Agent\\Agent.[0-9]+\\Agent.exe)/ && $2~/^.*\.exe([^\.]+|\s.*)/) { f3=$2; gsub(/\s+$/,"",f3); f2=fn($2); if (f2==f3 || f3~/^[A-Z]\:.*/) { print $1 "|" f2 } } }' >$DB
 
     for i in $(seq 1 $(cat $DB | wc -l))
     do
         CURRENT=$(cat $DB | awk "NR == $COUNT")
         PID=`echo "$CURRENT" | awk -F\| '{print $1}'`
+#        FULL=`echo "$CURRENT" | awk -F\| '{print $3}'`
         CURRENT=`echo "$CURRENT" | awk -F\| '{print $2}'`
         if [[ $PID == "0" ]]
         then
@@ -74,7 +75,7 @@ do
             if [[ ! -f "$TMP/$CURRENT.dummy" ]]
             then
                 echo "thread $CURRENT $PID $TMP"
-                thread "$CURRENT" "$PID" "$TMP" > /dev/null 2>&1 & 
+                thread "$CURRENT" "$PID" "$TMP" > /dev/null 2>&1 &
             fi
         fi
         COUNT=$((COUNT + 1))
