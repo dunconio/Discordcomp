@@ -36,6 +36,7 @@ function thread {
 
     cp dummy "$TMP/$CURRENT.dummy"
     chmod +x "$TMP/$CURRENT.dummy"
+    touch -t 200001010000 "$TMP/$CURRENT.dummy"
     "$TMP/$CURRENT.dummy" > /dev/null 2>&1 &
     DUMMYPID=$!
 
